@@ -6,8 +6,8 @@ import SearchBox from '@/components/SearchBox';
 const Index = () => {
   return (
     <Layout>
-      <div className="max-w-screen-xl mx-auto px-4 flex flex-col items-center justify-center min-h-[80vh]">
-        <div className="text-center mb-12 animate-in">
+      <div className="max-w-screen-xl mx-auto px-4 flex flex-col items-center justify-center min-h-[calc(80vh-80px)]">
+        <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold mb-4 tracking-tight">
             Horizon
           </h1>
@@ -18,7 +18,7 @@ const Index = () => {
         
         <SearchBox />
         
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl animate-in animate-delay-400">
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl">
           {[
             {
               title: 'Identity Information',
@@ -35,8 +35,7 @@ const Index = () => {
           ].map((feature, index) => (
             <div 
               key={index} 
-              className="glass-card p-6 rounded-xl"
-              style={{ animationDelay: `${(index + 4) * 100}ms` }}
+              className="bg-white/5 backdrop-blur-sm border border-white/10 p-6 rounded-xl"
             >
               <h3 className="text-lg font-medium mb-2">{feature.title}</h3>
               <p className="text-gray-400 text-sm">{feature.description}</p>

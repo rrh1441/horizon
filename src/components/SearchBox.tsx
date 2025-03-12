@@ -35,7 +35,7 @@ const SearchBox = () => {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto animate-in animate-delay-200">
+    <div className="w-full max-w-3xl mx-auto">
       <form onSubmit={handleSearch} className="relative">
         <div className="relative">
           <Search 
@@ -48,7 +48,7 @@ const SearchBox = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name, email, domain, or phone number..."
-            className="search-bar pl-12 pr-12 text-base md:text-lg h-16"
+            className="w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-full pl-12 pr-12 py-3 text-base md:text-lg h-16 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={isLoading}
           />
           
