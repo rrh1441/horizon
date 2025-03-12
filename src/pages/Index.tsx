@@ -17,7 +17,7 @@ const Index = () => {
         </div>
         
         <div className="w-full max-w-3xl mb-8">
-          <SearchBox />
+          <SearchBox buttonText="Get One Free Report with Signup" />
           
           <p className="text-gray-400 text-sm mt-4 text-center">
             Enter a full name and at least one additional identifier to begin your search

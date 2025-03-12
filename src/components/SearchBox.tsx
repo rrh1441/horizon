@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, ArrowRight, User, Mail, Globe, Briefcase, Phone, AlertCircle, X, Plus } from 'lucide-react';
@@ -13,7 +12,11 @@ interface FieldData {
   value: string;
 }
 
-const SearchBox = () => {
+interface SearchBoxProps {
+  buttonText?: string;
+}
+
+const SearchBox = ({ buttonText = "Search" }: SearchBoxProps) => {
   const [name, setName] = useState('');
   const [fields, setFields] = useState<FieldData[]>([
     { id: crypto.randomUUID(), type: 'email', value: '' }
@@ -22,7 +25,6 @@ const SearchBox = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  // Field configuration
   const fieldConfig = {
     email: {
       icon: <Mail size={20} />,
@@ -51,23 +53,19 @@ const SearchBox = () => {
   };
 
   const validateFields = () => {
-    // Clear any existing errors
     setError('');
     
-    // Validate name (required)
     if (!name.trim() || name.length < 2) {
       setError('Please enter a valid name (minimum 2 characters)');
       return false;
     }
     
-    // Validate that at least one field has a value
     const hasValue = fields.some(field => field.value.trim() !== '');
     if (!hasValue) {
       setError('Please enter at least one additional identifier');
       return false;
     }
     
-    // Validate each field with a value
     for (const field of fields) {
       if (field.value.trim() !== '' && !fieldConfig[field.type].validate(field.value)) {
         setError(fieldConfig[field.type].errorMessage);
@@ -118,7 +116,6 @@ const SearchBox = () => {
     
     setIsLoading(true);
     
-    // Create a query object with all the data
     const searchData = {
       name: name.trim(),
       fields: fields.filter(f => f.value.trim() !== '').map(f => ({ 
@@ -127,7 +124,6 @@ const SearchBox = () => {
       }))
     };
     
-    // Store in local history
     const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
     const newHistory = [
       { 
@@ -137,15 +133,12 @@ const SearchBox = () => {
         timestamp: new Date().toISOString() 
       },
       ...history,
-    ].slice(0, 10); // Keep only 10 most recent searches
+    ].slice(0, 10);
     
     localStorage.setItem('searchHistory', JSON.stringify(newHistory));
     
-    // In a real app, we would send this to an API
-    // For now, simulate a delay and navigate
     setTimeout(() => {
       setIsLoading(false);
-      // Navigate to profile page with the search query
       navigate(`/profile/${encodeURIComponent(name)}`);
     }, 1500);
   };
@@ -153,7 +146,6 @@ const SearchBox = () => {
   return (
     <div className="w-full max-w-3xl mx-auto">
       <form onSubmit={handleSearch} className="flex flex-col gap-4">
-        {/* Name field (always required) */}
         <div className="relative">
           <User 
             className="absolute left-5 top-1/2 transform -translate-y-1/2 text-muted-foreground" 
@@ -170,7 +162,6 @@ const SearchBox = () => {
           />
         </div>
         
-        {/* Additional fields */}
         <div className="space-y-3">
           {fields.map((field, index) => (
             <div key={field.id} className="flex flex-col sm:flex-row gap-2">
@@ -221,7 +212,6 @@ const SearchBox = () => {
           ))}
         </div>
         
-        {/* Add another field button */}
         <div>
           <Button
             type="button"
@@ -235,7 +225,6 @@ const SearchBox = () => {
           </Button>
         </div>
         
-        {/* Search button */}
         <Button 
           type="submit"
           className="w-full h-14 mt-2 text-lg"
@@ -246,10 +235,9 @@ const SearchBox = () => {
           ) : (
             <Search size={18} className="mr-2" />
           )}
-          Search
+          {buttonText}
         </Button>
         
-        {/* Error message */}
         {error && (
           <div className="flex items-center gap-2 text-red-400 text-sm mt-1">
             <AlertCircle size={16} />
