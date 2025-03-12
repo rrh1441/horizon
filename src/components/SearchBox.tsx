@@ -1,16 +1,23 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ArrowRight, User, Mail, Globe, Briefcase, Phone, AlertCircle } from 'lucide-react';
+import { Search, ArrowRight, User, Mail, Globe, Briefcase, Phone, AlertCircle, X, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 
-type SearchField = 'email' | 'domain' | 'employer' | 'phone';
+type FieldType = 'email' | 'domain' | 'employer' | 'phone';
+
+interface FieldData {
+  id: string;
+  type: FieldType;
+  value: string;
+}
 
 const SearchBox = () => {
   const [name, setName] = useState('');
-  const [secondaryValue, setSecondaryValue] = useState('');
-  const [secondaryField, setSecondaryField] = useState<SearchField>('email');
+  const [fields, setFields] = useState<FieldData[]>([
+    { id: crypto.randomUUID(), type: 'email', value: '' }
+  ]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -53,19 +60,48 @@ const SearchBox = () => {
       return false;
     }
     
-    // Validate secondary field (required)
-    if (!secondaryValue.trim()) {
-      setError(`Please enter a ${secondaryField}`);
+    // Validate that at least one field has a value
+    const hasValue = fields.some(field => field.value.trim() !== '');
+    if (!hasValue) {
+      setError('Please enter at least one additional identifier');
       return false;
     }
     
-    // Validate format of secondary field
-    if (!fieldConfig[secondaryField].validate(secondaryValue)) {
-      setError(fieldConfig[secondaryField].errorMessage);
-      return false;
+    // Validate each field with a value
+    for (const field of fields) {
+      if (field.value.trim() !== '' && !fieldConfig[field.type].validate(field.value)) {
+        setError(fieldConfig[field.type].errorMessage);
+        return false;
+      }
     }
     
     return true;
+  };
+
+  const handleAddField = () => {
+    setFields([...fields, { 
+      id: crypto.randomUUID(),
+      type: 'email', 
+      value: '' 
+    }]);
+  };
+
+  const handleRemoveField = (id: string) => {
+    if (fields.length > 1) {
+      setFields(fields.filter(field => field.id !== id));
+    }
+  };
+
+  const handleFieldTypeChange = (id: string, type: FieldType) => {
+    setFields(fields.map(field => 
+      field.id === id ? { ...field, type } : field
+    ));
+  };
+
+  const handleFieldValueChange = (id: string, value: string) => {
+    setFields(fields.map(field => 
+      field.id === id ? { ...field, value } : field
+    ));
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -85,7 +121,10 @@ const SearchBox = () => {
     // Create a query object with all the data
     const searchData = {
       name: name.trim(),
-      [secondaryField]: secondaryValue.trim()
+      fields: fields.filter(f => f.value.trim() !== '').map(f => ({ 
+        type: f.type, 
+        value: f.value.trim() 
+      }))
     };
     
     // Store in local history
@@ -94,8 +133,7 @@ const SearchBox = () => {
       { 
         id: Date.now(), 
         query: name, 
-        secondaryField,
-        secondaryValue,
+        fields: searchData.fields,
         timestamp: new Date().toISOString() 
       },
       ...history,
@@ -132,51 +170,84 @@ const SearchBox = () => {
           />
         </div>
         
-        {/* Field selector and secondary field */}
-        <div className="flex flex-col sm:flex-row gap-2">
-          {/* Field selector */}
-          <div className="sm:w-1/3">
-            <select
-              value={secondaryField}
-              onChange={(e) => setSecondaryField(e.target.value as SearchField)}
-              className="w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-3 text-base h-14 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
-              disabled={isLoading}
-            >
-              <option value="email">Email</option>
-              <option value="domain">Domain</option>
-              <option value="employer">Employer</option>
-              <option value="phone">Phone</option>
-            </select>
-          </div>
-          
-          {/* Secondary input field */}
-          <div className="relative sm:w-2/3">
-            <div className="absolute left-5 top-1/2 transform -translate-y-1/2 text-muted-foreground">
-              {fieldConfig[secondaryField].icon}
+        {/* Additional fields */}
+        <div className="space-y-3">
+          {fields.map((field, index) => (
+            <div key={field.id} className="flex flex-col sm:flex-row gap-2">
+              <div className="sm:w-1/3 flex gap-2">
+                <div className="flex-1">
+                  <select
+                    value={field.type}
+                    onChange={(e) => handleFieldTypeChange(field.id, e.target.value as FieldType)}
+                    className="w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-3 text-base h-14 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                    disabled={isLoading}
+                  >
+                    <option value="email">Email</option>
+                    <option value="domain">Domain</option>
+                    <option value="employer">Employer</option>
+                    <option value="phone">Phone</option>
+                  </select>
+                </div>
+                
+                {fields.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleRemoveField(field.id)}
+                    className="h-14 w-14 border border-white/10 bg-white/5"
+                    disabled={isLoading}
+                  >
+                    <X size={18} />
+                  </Button>
+                )}
+              </div>
+              
+              <div className="relative sm:w-2/3">
+                <div className="absolute left-5 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+                  {fieldConfig[field.type].icon}
+                </div>
+                
+                <input
+                  type="text"
+                  value={field.value}
+                  onChange={(e) => handleFieldValueChange(field.id, e.target.value)}
+                  placeholder={fieldConfig[field.type].placeholder}
+                  className="w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl pl-12 pr-4 py-3 text-base h-14 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={isLoading}
+                />
+              </div>
             </div>
-            
-            <input
-              type="text"
-              value={secondaryValue}
-              onChange={(e) => setSecondaryValue(e.target.value)}
-              placeholder={fieldConfig[secondaryField].placeholder}
-              className="w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl pl-12 pr-12 py-3 text-base h-14 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              disabled={isLoading}
-            />
-            
-            <Button 
-              type="submit"
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 rounded-full w-10 h-10 p-0 flex items-center justify-center"
-              disabled={isLoading || !name.trim() || !secondaryValue.trim()}
-            >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <ArrowRight size={18} />
-              )}
-            </Button>
-          </div>
+          ))}
         </div>
+        
+        {/* Add another field button */}
+        <div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleAddField}
+            className="w-full border border-white/10 bg-white/5 h-12"
+            disabled={isLoading}
+          >
+            <Plus size={18} className="mr-2" />
+            Add another identifier
+          </Button>
+        </div>
+        
+        {/* Search button */}
+        <Button 
+          type="submit"
+          className="w-full h-14 mt-2 text-lg"
+          disabled={isLoading || !name.trim() || !fields.some(f => f.value.trim() !== '')}
+        >
+          {isLoading ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+          ) : (
+            <Search size={18} className="mr-2" />
+          )}
+          Search
+        </Button>
         
         {/* Error message */}
         {error && (

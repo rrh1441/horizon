@@ -12,7 +12,7 @@ const Index = () => {
             Horizon
           </h1>
           <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto">
-            Comprehensive background intelligence powered by OSINT and AI
+            Comprehensive background checks powered by OSINT
           </p>
         </div>
         
