@@ -7,7 +7,7 @@ const Index = () => {
   return (
     <Layout>
       <div className="max-w-screen-xl mx-auto px-4 flex flex-col items-center justify-center min-h-[calc(80vh-80px)]">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h1 className="text-4xl md:text-6xl font-bold mb-4 tracking-tight">
             Horizon
           </h1>
@@ -16,9 +16,15 @@ const Index = () => {
           </p>
         </div>
         
-        <SearchBox />
+        <div className="w-full max-w-3xl mb-8">
+          <SearchBox />
+          
+          <p className="text-gray-400 text-sm mt-4 text-center">
+            Enter a full name and at least one additional identifier to begin your search
+          </p>
+        </div>
         
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl">
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl">
           {[
             {
               title: 'Identity Information',
